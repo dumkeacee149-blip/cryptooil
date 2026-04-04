@@ -20,6 +20,7 @@ interface PointData {
   readonly dailyBarrels: string;
   readonly size: number;
   readonly color: string;
+  readonly isHormuz?: boolean;
 }
 
 interface RingData {
@@ -47,25 +48,41 @@ export default function HolographicGlobe() {
 
   const pointsData: readonly PointData[] = useMemo(
     () =>
-      Object.values(CHOKEPOINTS).map((cp) => ({
-        lat: cp.lat,
-        lng: cp.lng,
-        name: cp.name,
-        dailyBarrels: cp.dailyBarrels,
-        size: 0.6,
-        color: COLORS.warning,
-      })),
+      Object.entries(CHOKEPOINTS).map(([key, cp]) => {
+        const isHormuz = key === 'HORMUZ';
+        return {
+          lat: cp.lat,
+          lng: cp.lng,
+          name: cp.name,
+          dailyBarrels: cp.dailyBarrels,
+          size: isHormuz ? 1.2 : 0.6,
+          color: isHormuz ? COLORS.danger : COLORS.warning,
+          isHormuz,
+        };
+      }),
     []
   );
 
   const ringsData: readonly RingData[] = useMemo(
     () =>
-      Object.values(CHOKEPOINTS).map((cp) => ({
-        lat: cp.lat,
-        lng: cp.lng,
-        maxR: 3,
-        color: COLORS.primary,
-      })),
+      Object.entries(CHOKEPOINTS).map(([key, cp]) => {
+        const isHormuz = key === 'HORMUZ';
+        return {
+          lat: cp.lat,
+          lng: cp.lng,
+          maxR: isHormuz ? 5 : 3,
+          color: isHormuz ? COLORS.danger : COLORS.primary,
+        };
+      }),
+    []
+  );
+
+  // Extra pulsing rings for Hormuz emphasis
+  const hormuzExtraRings: readonly RingData[] = useMemo(
+    () => [
+      { lat: CHOKEPOINTS.HORMUZ.lat, lng: CHOKEPOINTS.HORMUZ.lng, maxR: 8, color: COLORS.danger },
+      { lat: CHOKEPOINTS.HORMUZ.lat, lng: CHOKEPOINTS.HORMUZ.lng, maxR: 12, color: COLORS.warning },
+    ],
     []
   );
 
@@ -117,11 +134,23 @@ export default function HolographicGlobe() {
 
   const getRingColor = useCallback((d: object) => {
     const ring = d as RingData;
+    if (ring.color === COLORS.danger) {
+      return (t: number) => `rgba(255, 0, 64, ${Math.sqrt(1 - t)})`;
+    }
+    if (ring.color === COLORS.warning) {
+      return (t: number) => `rgba(255, 170, 0, ${Math.sqrt(1 - t) * 0.6})`;
+    }
     return (t: number) => `rgba(0, 240, 255, ${Math.sqrt(1 - t)})`;
   }, []);
   const getRingMaxR = useCallback((d: object) => (d as RingData).maxR, []);
-  const getRingSpeed = useCallback(() => 1, []);
-  const getRingRepeatPeriod = useCallback(() => 800, []);
+  const getRingSpeed = useCallback((d: object) => {
+    const ring = d as RingData;
+    return ring.maxR > 5 ? 2 : 1;
+  }, []);
+  const getRingRepeatPeriod = useCallback((d: object) => {
+    const ring = d as RingData;
+    return ring.maxR > 5 ? 1200 : 800;
+  }, []);
 
   const getArcDashLength = useCallback(() => 0.4, []);
   const getArcDashGap = useCallback(() => 0.2, []);
@@ -135,6 +164,15 @@ export default function HolographicGlobe() {
 
   const getPointLabel = useCallback((d: object) => {
     const point = d as PointData;
+    if (point.isHormuz) {
+      return `<div style="color: #ff0040; font-size: 12px; padding: 8px 12px; background: rgba(10,0,0,0.95); border: 1px solid rgba(255,0,64,0.6); border-radius: 4px; min-width: 200px;">
+        <div style="font-weight: bold; font-size: 13px; margin-bottom: 4px;">&#9888; STRAIT OF HORMUZ</div>
+        <div style="color: #ffaa00; font-size: 10px; margin-bottom: 2px;">CRITICAL CHOKEPOINT - PRIORITY MONITOR</div>
+        <div style="color: #c0e8ff; font-size: 10px;">Daily flow: 21M bbl/day (21% global supply)</div>
+        <div style="color: #c0e8ff; font-size: 10px;">Width: 33km | Depth: 60m</div>
+        <div style="color: #ff0040; font-size: 10px; margin-top: 4px;">Iran threat level: ELEVATED</div>
+      </div>`;
+    }
     return `<div style="color: ${COLORS.primary}; font-size: 11px; padding: 4px 8px; background: rgba(0,10,20,0.9); border: 1px solid rgba(0,240,255,0.3); border-radius: 4px;">
       <strong>${point.name}</strong>${point.dailyBarrels ? `<br/>${point.dailyBarrels} bbl/day` : ''}
     </div>`;
@@ -146,8 +184,8 @@ export default function HolographicGlobe() {
   );
 
   const allRings = useMemo(
-    () => [...ringsData, ...conflictRingsData],
-    [ringsData, conflictRingsData]
+    () => [...ringsData, ...hormuzExtraRings, ...conflictRingsData],
+    [ringsData, hormuzExtraRings, conflictRingsData]
   );
 
   return (
@@ -193,6 +231,14 @@ export default function HolographicGlobe() {
       {/* Globe title overlay */}
       <div className="absolute left-4 top-4 z-20 text-[10px] uppercase tracking-[0.2em] text-[var(--color-text-dim)]">
         GLOBAL OIL FLOW MONITOR
+      </div>
+
+      {/* Hormuz priority monitor badge */}
+      <div className="absolute right-4 top-4 z-20 flex items-center gap-2 px-3 py-1.5 rounded border border-[rgba(255,0,64,0.4)] bg-[rgba(255,0,64,0.08)]">
+        <div className="h-2 w-2 rounded-full bg-[var(--color-danger)] pulse-glow" />
+        <span className="text-[9px] uppercase tracking-[0.15em] text-[var(--color-danger)] font-bold">
+          HORMUZ PRIORITY WATCH
+        </span>
       </div>
     </div>
   );

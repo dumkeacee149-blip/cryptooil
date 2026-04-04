@@ -32,6 +32,10 @@ const PriceTicker = dynamic(
 const ChatPanel = dynamic(() => import('@/features/ai-chat/ChatPanel'), {
   ssr: false,
 });
+const BinanceBanner = dynamic(
+  () => import('@/features/trading/BinanceBanner'),
+  { ssr: false }
+);
 
 function GlobeLoader() {
   return (
@@ -96,6 +100,9 @@ export default function WarRoomLayout() {
             </HolographicFrame>
           </div>
         </div>
+
+        {/* Binance trading banner */}
+        <BinanceBanner />
 
         {/* Bottom ticker */}
         <PriceTicker />
