@@ -6,6 +6,7 @@ import StatusBar from './StatusBar';
 import ScanlineOverlay from './ScanlineOverlay';
 import BootSequence from './BootSequence';
 import HolographicFrame from './HolographicFrame';
+import ErrorBoundary from './ErrorBoundary';
 
 const HolographicGlobe = dynamic(
   () => import('@/features/globe/HolographicGlobe'),
@@ -83,7 +84,9 @@ export default function WarRoomLayout() {
 
           {/* Center - Globe */}
           <div className="row-span-2 relative min-h-0">
-            <HolographicGlobe />
+            <ErrorBoundary>
+              <HolographicGlobe />
+            </ErrorBoundary>
           </div>
 
           {/* Right column */}

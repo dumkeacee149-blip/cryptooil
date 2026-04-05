@@ -20,8 +20,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${geistMono.variable} h-full`}>
-      <body className="h-full overflow-hidden">{children}</body>
+    <html lang="en" translate="no" className={`${geistMono.variable} h-full`}>
+      <head>
+        <meta name="google" content="notranslate" />
+      </head>
+      <body className="h-full overflow-hidden notranslate">{children}</body>
     </html>
   );
 }
