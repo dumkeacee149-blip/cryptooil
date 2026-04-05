@@ -11,7 +11,7 @@ function getApiKey(): string {
 
 interface EiaDataPoint {
   readonly period: string;
-  readonly value: number;
+  readonly value: string | number;
 }
 
 interface EiaResponse {
@@ -40,12 +40,14 @@ async function fetchEiaSeries(
 
 function toOilPrices(points: readonly EiaDataPoint[]): readonly OilPrice[] {
   return points.map((point, i) => {
+    const value = Number(point.value);
     const prev = points[i + 1];
-    const change = prev ? point.value - prev.value : 0;
-    const changePercent = prev && prev.value !== 0 ? (change / prev.value) * 100 : 0;
+    const prevValue = prev ? Number(prev.value) : 0;
+    const change = prev ? value - prevValue : 0;
+    const changePercent = prev && prevValue !== 0 ? (change / prevValue) * 100 : 0;
     return {
       date: point.period,
-      value: point.value,
+      value,
       change,
       changePercent,
     };
@@ -54,11 +56,13 @@ function toOilPrices(points: readonly EiaDataPoint[]): readonly OilPrice[] {
 
 function toInventoryPoints(points: readonly EiaDataPoint[]): readonly InventoryPoint[] {
   return points.map((point, i) => {
+    const value = Number(point.value);
     const prev = points[i + 1];
-    const change = prev ? point.value - prev.value : 0;
+    const prevValue = prev ? Number(prev.value) : 0;
+    const change = prev ? value - prevValue : 0;
     return {
       date: point.period,
-      value: point.value / 1000, // Convert thousands of barrels to millions
+      value: value / 1000, // Convert thousands of barrels to millions
       change: change / 1000,
     };
   });
