@@ -189,7 +189,7 @@ export default function HolographicGlobe() {
   );
 
   return (
-    <div className="relative h-full w-full">
+    <div className="relative h-full w-full overflow-hidden">
       {/* Globe glow effect */}
       <div
         className="pointer-events-none absolute inset-0 z-10"
@@ -198,6 +198,7 @@ export default function HolographicGlobe() {
             'radial-gradient(circle at center, rgba(0,240,255,0.03) 0%, transparent 60%)',
         }}
       />
+      <div className="absolute inset-0">
       <Globe
         ref={globeRef}
         width={undefined}
@@ -227,6 +228,7 @@ export default function HolographicGlobe() {
         ringPropagationSpeed={getRingSpeed}
         ringRepeatPeriod={getRingRepeatPeriod}
       />
+      </div>
 
       {/* Globe title overlay */}
       <div className="absolute left-4 top-4 z-20 text-[10px] uppercase tracking-[0.2em] text-[var(--color-text-dim)]">

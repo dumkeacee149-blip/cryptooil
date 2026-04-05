@@ -70,37 +70,48 @@ export default function WarRoomLayout() {
         {/* Top status bar */}
         <StatusBar />
 
-        {/* Main content grid */}
-        <div className="flex-1 grid grid-cols-[320px_1fr_320px] grid-rows-[1fr_1fr] gap-2 p-2 min-h-0">
-          {/* Left column */}
-          <div className="row-span-2 flex flex-col gap-2 min-h-0">
-            <HolographicFrame title="Oil Prices" className="flex-1 min-h-0">
-              <PricePanel />
-            </HolographicFrame>
-            <HolographicFrame title="Inventory / SPR" className="flex-[0.6] min-h-0">
-              <InventoryPanel />
-            </HolographicFrame>
-          </div>
+        {/* Main content — scrollable on mobile/tablet, fixed grid on desktop */}
+        <div className="flex-1 overflow-y-auto lg:overflow-hidden min-h-0">
+          {/* Desktop: 3-column grid */}
+          <div className="
+            flex flex-col gap-2 p-2
+            md:grid md:grid-cols-[280px_1fr] md:grid-rows-[1fr_1fr]
+            lg:grid-cols-[280px_1fr_280px]
+            xl:grid-cols-[320px_1fr_320px]
+            min-h-0 h-auto lg:h-full
+          ">
+            {/* Left column: Prices + Inventory */}
+            <div className="md:row-span-2 flex flex-col gap-2 min-h-0">
+              <HolographicFrame title="Oil Prices" className="flex-1 min-h-[280px] lg:min-h-0">
+                <PricePanel />
+              </HolographicFrame>
+              <HolographicFrame title="Inventory / SPR" className="flex-[0.6] min-h-[200px] lg:min-h-0">
+                <InventoryPanel />
+              </HolographicFrame>
+            </div>
 
-          {/* Center - Globe */}
-          <div className="row-span-2 relative min-h-0">
-            <ErrorBoundary>
-              <HolographicGlobe />
-            </ErrorBoundary>
-          </div>
+            {/* Center - Globe */}
+            <div className="md:row-span-2 relative min-h-[300px] md:min-h-[400px] lg:min-h-0 overflow-hidden">
+              <ErrorBoundary>
+                <HolographicGlobe />
+              </ErrorBoundary>
+            </div>
 
-          {/* Right column */}
-          <div className="row-span-2 flex flex-col gap-2 min-h-0">
-            <HolographicFrame title="Geopolitical Risk" className="flex-1 min-h-0">
-              <RiskPanel />
-            </HolographicFrame>
-            <HolographicFrame
-              title="Alerts"
-              variant="warning"
-              className="flex-[0.6] min-h-0"
-            >
-              <AlertPanel />
-            </HolographicFrame>
+            {/* Right column: Risk + Alerts */}
+            <div className="md:col-span-2 lg:col-span-1 md:row-span-1 lg:row-span-2 flex flex-col gap-2 min-h-0">
+              <div className="md:grid md:grid-cols-2 lg:flex lg:flex-col gap-2 flex-1 min-h-0">
+                <HolographicFrame title="Geopolitical Risk" className="flex-1 min-h-[200px] lg:min-h-0">
+                  <RiskPanel />
+                </HolographicFrame>
+                <HolographicFrame
+                  title="Alerts"
+                  variant="warning"
+                  className="flex-[0.6] min-h-[180px] lg:min-h-0"
+                >
+                  <AlertPanel />
+                </HolographicFrame>
+              </div>
+            </div>
           </div>
         </div>
 
